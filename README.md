@@ -1,136 +1,67 @@
-# SillyTavern Android 应用
+# SillyTavern - Local AI Chat
 
-基于 [SillyTavern](https://github.com/SillyTavern/SillyTavern) 项目构建的 Android 原生应用。
+基于 SillyTavern 构建的**完全离线** Android 应用，无需任何云端配置即可使用。
 
-## 项目结构
+## 功能特点
 
+- 🤖 **本地 AI** - 使用 WebLLM 在浏览器中直接运行 AI 模型
+- 🌐 **免费 API** - 支持 OpenRouter、Groq、Together AI 等免费 API
+- 🔧 **自定义服务器** - 可连接任何 OpenAI 兼容的 API
+- 📱 **移动优化** - 原生 Android 应用，离线可用
+- 💬 **聊天功能** - 与 AI 角色对话
+- 🎭 **角色管理** - 创建和管理 AI 角色
+- 🔒 **隐私保护** - 数据存储在本地设备
+
+## AI 模式
+
+### 1. 本地 AI (WebLLM)
+- 完全离线运行
+- 使用设备 GPU
+- 无需互联网连接
+- 需要设备支持 WebGPU
+
+### 2. 免费 API
+- OpenRouter (免费模型)
+- Groq (免费额度)
+- Together AI (免费积分)
+
+### 3. 自定义服务器
+- 连接 SillyTavern 服务器
+- 连接 Ollama
+- 连接任何 OpenAI 兼容 API
+
+## 构建
+
+```bash
+# 克隆项目
+git clone https://github.com/xcicvas/aiapp.git
+cd aiapp
+
+# 安装依赖
+npm install
+
+# 构建 Web 应用
+npm run build
+
+# 同步到 Android
+npx cap sync android
+
+# 构建 APK
+cd android
+./gradlew assembleDebug
 ```
-sillytavern-android/
-├── android/                    # Android 原生项目
-│   ├── app/
-│   │   └── src/main/          # 主应用代码
-│   │       ├── assets/         # Web 资源
-│   │       ├── java/          # Java/Kotlin 代码
-│   │       └── res/           # Android 资源
-│   └── build.gradle           # Gradle 配置
-├── src/                       # Web 前端源码
-│   ├── main.js                # 主应用逻辑
-│   └── index.html             # 入口页面
-├── dist/                      # 构建输出目录
-├── package.json              # npm 配置
-├── capacitor.config.ts       # Capacitor 配置
-└── vite.config.js            # Vite 构建配置
-```
 
-## 功能特性
-
-- 🤖 连接远程 SillyTavern 服务器进行 AI 对话
-- 💬 实时聊天界面
-- 🎭 角色管理和选择
-- ⚙️ 服务器配置设置
-- 🌙 深色主题设计
+APK 位置: `android/app/build/outputs/apk/debug/app-debug.apk`
 
 ## 技术栈
 
 | 技术 | 说明 |
 |------|------|
 | Capacitor 6.x | 混合应用框架 |
-| Vite 5.x | 前端构建工具 |
-| TypeScript | 类型支持 |
-| Android Gradle | Android 构建系统 |
-
-## 快速开始
-
-### 环境要求
-
-- Node.js 18+
-- npm 9+
-- Android SDK
-- JDK 17+
-
-### 构建步骤
-
-1. **安装依赖**
-
-```bash
-cd sillytavern-android
-npm install
-```
-
-2. **构建 Web 应用**
-
-```bash
-npm run build
-```
-
-3. **同步到 Android**
-
-```bash
-npx cap sync android
-```
-
-4. **构建 APK**
-
-```bash
-cd android
-gradle assembleDebug
-```
-
-或者使用 Gradle Wrapper:
-
-```bash
-cd android
-./gradlew assembleDebug
-```
-
-5. **安装到设备**
-
-```bash
-adb install app/build/outputs/apk/debug/app-debug.apk
-```
-
-## 应用配置
-
-### 服务器连接
-
-在应用设置中配置 SillyTavern 服务器地址：
-
-- **Server URL**: SillyTavern 服务器地址 (默认: http://localhost:8000)
-- **API Key**: 可选的 API 密钥
-
-### 权限说明
-
-应用需要以下权限：
-
-- `INTERNET` - 网络访问
-- `ACCESS_NETWORK_STATE` - 网络状态检查
-- `ACCESS_WIFI_STATE` - WiFi 状态检查
-
-## 开发
-
-### 调试 Web 应用
-
-```bash
-npm run dev
-```
-
-然后访问 http://localhost:3000
-
-### 更新 Capacitor
-
-```bash
-npx cap update
-```
-
-### 清理构建
-
-```bash
-npm run build
-npx cap sync android
-cd android
-gradle clean
-```
+| Vite 5.x | 前端构建 |
+| WebLLM | 本地 AI 推理 |
+| Android | 原生应用 |
 
 ## 许可证
 
-基于 SillyTavern AGPL-3.0 许可证
+基于 AGPL-3.0 许可证
