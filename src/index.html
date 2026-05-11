@@ -1,405 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#111827">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>SillyTavern - Local AI</title>
+    <title>AI Chat</title>
 
     <link rel="icon" href="./favicon.ico">
-    <link rel="apple-touch-icon" href="./img/apple-icon-192x192.png">
-
-    <link rel="stylesheet" href="./css/st-tailwind.css">
-    <link rel="stylesheet" href="./css/fontawesome.min.css">
-    <link rel="stylesheet" href="./css/solid.min.css">
-    <link rel="stylesheet" href="./css/brands.min.css">
-    <link rel="stylesheet" href="./css/toastr.min.css">
-    <link rel="stylesheet" href="./css/popup.css">
-    <link rel="stylesheet" href="./css/chat-backups.css">
-    <link rel="stylesheet" href="./css/loader.css">
-    <link rel="stylesheet" href="./css/mobile-styles.css">
-    <link rel="stylesheet" href="./css/animations.css">
-    <link rel="stylesheet" href="./css/world-info.css">
-    <link rel="stylesheet" href="./css/streaming-display.css">
 
     <style>
         :root {
-            --primary-color: #7C3AED;
-            --bg-color: #111827;
-            --surface-color: #1F2937;
-            --text-color: #F9FAFB;
-            --text-muted: #9CA3AF;
+            --primary: #7C3AED;
+            --bg: #111827;
+            --surface: #1F2937;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text-color);
+            width: 100%; height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        #app {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .safe-area-top { padding-top: env(safe-area-inset-top); }
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
-        /* Loading Screen */
-        #loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--surface-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #loading-screen p { margin-top: 20px; color: var(--text-muted); font-size: 14px; }
-        #loading-screen .subtitle { color: #6B7280; font-size: 12px; margin-top: 8px; }
-
-        /* Welcome Screen */
-        #welcome-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            z-index: 9998;
-        }
-
-        #welcome-screen.hidden { display: none; }
-
-        #welcome-screen h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #7C3AED, #A855F7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        #welcome-screen .tagline { color: var(--text-muted); margin-bottom: 40px; }
-
-        #welcome-screen .setup-card {
-            background: var(--surface-color);
-            border-radius: 16px;
-            padding: 24px;
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 20px;
-        }
-
-        #welcome-screen .setup-card h3 {
-            font-size: 16px;
-            margin-bottom: 16px;
-            color: var(--primary-color);
-        }
-
-        #welcome-screen .option-btn {
-            width: 100%;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 2px solid #374151;
-            border-radius: 12px;
-            background: transparent;
-            color: var(--text-color);
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        #welcome-screen .option-btn:hover, #welcome-screen .option-btn.selected {
-            border-color: var(--primary-color);
-            background: rgba(124, 58, 237, 0.1);
-        }
-
-        #welcome-screen .option-btn i { font-size: 24px; color: var(--primary-color); }
-        #welcome-screen .option-btn .desc { font-size: 12px; color: var(--text-muted); }
-
-        #welcome-screen .start-btn {
-            width: 100%;
-            max-width: 400px;
-            padding: 16px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        #welcome-screen .start-btn:hover { background: #6D28D9; }
-        #welcome-screen .start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #app { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
         /* Header */
-        #header {
-            background: var(--surface-color);
+        header {
+            background: var(--surface);
             padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid #374151;
+            flex-shrink: 0;
         }
 
-        #header .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        header h1 { font-size: 18px; font-weight: 600; }
 
-        #header .logo img { width: 32px; height: 32px; }
-        #header .logo span { font-weight: 600; font-size: 18px; }
-
-        #header .actions { display: flex; gap: 8px; }
-        #header .actions button {
+        header button {
             width: 40px; height: 40px;
             border: none; border-radius: 10px;
             background: #374151;
-            color: var(--text-color);
+            color: var(--text);
+            font-size: 16px;
             cursor: pointer;
-            font-size: 18px;
         }
 
-        /* Chat Container */
-        #chat-container {
+        /* Chat */
+        #chat {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
             padding-bottom: 80px;
         }
 
-        .message {
+        .msg {
             display: flex;
             margin-bottom: 16px;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.3s;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } }
 
-        .message.user { justify-content: flex-end; }
-        .message .avatar {
-            width: 40px; height: 40px;
+        .msg.user { justify-content: flex-end; }
+
+        .msg .avatar {
+            width: 36px; height: 36px;
             border-radius: 50%;
-            background: var(--surface-color);
+            background: var(--surface);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 16px;
             flex-shrink: 0;
-            font-size: 18px;
         }
 
-        .message.user .avatar { background: var(--primary-color); }
+        .msg.user .avatar { background: var(--primary); }
 
-        .message .bubble {
+        .msg .bubble {
             max-width: 75%;
             padding: 12px 16px;
             border-radius: 16px;
-            background: var(--surface-color);
+            background: var(--surface);
             margin-left: 10px;
         }
 
-        .message.user .bubble {
-            background: var(--primary-color);
+        .msg.user .bubble {
+            background: var(--primary);
             margin-left: 0;
             margin-right: 10px;
         }
 
-        .message .bubble p { margin: 0; line-height: 1.5; }
-        .message .bubble .time { font-size: 11px; opacity: 0.6; margin-top: 6px; }
+        .msg .bubble p { margin: 0; line-height: 1.6; white-space: pre-wrap; }
+        .msg .bubble .time { font-size: 11px; opacity: 0.6; margin-top: 6px; }
 
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 12px 16px;
-        }
-
-        .typing-indicator span {
+        /* Typing */
+        .typing { display: flex; gap: 4px; }
+        .typing span {
             width: 8px; height: 8px;
-            background: var(--text-muted);
+            background: var(--muted);
             border-radius: 50%;
             animation: typing 1.4s infinite;
         }
-
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
 
-        /* Input Area */
+        /* Welcome */
+        #welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #welcome.hidden { display: none; }
+
+        #welcome .icon {
+            width: 80px; height: 80px;
+            background: var(--surface);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        #welcome h2 { font-size: 20px; margin-bottom: 8px; }
+        #welcome p { color: var(--muted); font-size: 14px; }
+
+        /* Input */
         #input-area {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface-color);
+            bottom: 0; left: 0; right: 0;
+            background: var(--surface);
             padding: 12px 16px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
             border-top: 1px solid #374151;
         }
 
-        #input-area .input-row {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
+        #input-area.hidden { display: none; }
 
-        #message-input {
+        #input-area .row { display: flex; gap: 10px; align-items: flex-end; }
+
+        #msg-input {
             flex: 1;
             background: #374151;
             border: none;
             border-radius: 24px;
             padding: 14px 20px;
-            color: var(--text-color);
+            color: var(--text);
             font-size: 15px;
             resize: none;
             max-height: 120px;
         }
 
-        #message-input::placeholder { color: var(--text-muted); }
-        #message-input:focus { outline: none; box-shadow: 0 0 0 2px var(--primary-color); }
+        #msg-input::placeholder { color: var(--muted); }
+        #msg-input:focus { outline: none; }
 
         #send-btn {
             width: 48px; height: 48px;
             border: none; border-radius: 50%;
-            background: var(--primary-color);
+            background: var(--primary);
             color: white;
             font-size: 18px;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        #send-btn:hover { background: #6D28D9; transform: scale(1.05); }
-        #send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        #send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Character Selector */
-        #character-selector {
+        /* Status */
+        #status {
             position: fixed;
-            top: 0;
-            right: -100%;
-            width: 80%;
-            max-width: 360px;
-            height: 100%;
-            background: var(--bg-color);
-            z-index: 1000;
-            transition: right 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #character-selector.open { right: 0; }
-
-        #character-selector .header {
-            padding: 16px;
-            background: var(--surface-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #character-selector .header h3 { margin: 0; font-size: 18px; }
-
-        #character-selector .close-btn {
-            width: 36px; height: 36px;
-            border: none; border-radius: 50%;
-            background: #374151;
-            color: white;
-            cursor: pointer;
-        }
-
-        #character-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-
-        .character-card {
-            display: flex;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            background: var(--surface-color);
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .character-card:hover, .character-card.active {
-            background: rgba(124, 58, 237, 0.2);
-            border: 1px solid var(--primary-color);
-        }
-
-        .character-card .avatar {
-            width: 56px; height: 56px;
-            border-radius: 12px;
-            background: #374151;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .character-card .info h4 { margin: 0 0 4px 0; font-size: 15px; }
-        .character-card .info p { margin: 0; font-size: 12px; color: var(--text-muted); }
-
-        /* Overlay */
-        #overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-        }
-
-        #overlay.show { opacity: 1; visibility: visible; }
-
-        /* Status Bar */
-        #status-bar {
-            position: fixed;
-            top: 60px;
-            left: 50%;
+            top: 70px; left: 50%;
             transform: translateX(-50%);
-            background: var(--surface-color);
+            background: var(--surface);
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
@@ -411,13 +196,12 @@
             transition: opacity 0.3s;
         }
 
-        #status-bar.show { opacity: 1; }
-        #status-bar .dot { width: 8px; height: 8px; border-radius: 50%; }
-        #status-bar .dot.green { background: #10B981; }
-        #status-bar .dot.yellow { background: #F59E0B; }
-        #status-bar .dot.red { background: #EF4444; }
+        #status.show { opacity: 1; }
+        #status .dot { width: 8px; height: 8px; border-radius: 50%; }
+        #status .dot.green { background: #10B981; }
+        #status .dot.red { background: #EF4444; }
 
-        /* API Config Modal */
+        /* Modal */
         .modal {
             position: fixed;
             inset: 0;
@@ -425,7 +209,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s;
@@ -434,41 +218,34 @@
         .modal.show { opacity: 1; visibility: visible; }
 
         .modal-content {
-            background: var(--surface-color);
+            background: var(--surface);
             border-radius: 20px;
             padding: 24px;
             width: 90%;
             max-width: 400px;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
-        .modal-content h3 { margin: 0 0 20px 0; font-size: 18px; }
+        .modal-content h3 { margin-bottom: 20px; font-size: 18px; }
 
         .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-muted); }
-        .form-group input, .form-group select {
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+        .form-group select, .form-group input {
             width: 100%;
             padding: 12px;
             background: #374151;
             border: 1px solid #4B5563;
             border-radius: 10px;
-            color: var(--text-color);
+            color: var(--text);
             font-size: 14px;
         }
 
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--primary); }
 
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+        .actions { display: flex; gap: 10px; margin-top: 20px; }
 
-        .modal-actions button {
+        .actions button {
             flex: 1;
             padding: 12px;
             border: none;
@@ -478,150 +255,95 @@
             cursor: pointer;
         }
 
-        .modal-actions .cancel { background: #374151; color: var(--text-color); }
-        .modal-actions .save { background: var(--primary-color); color: white; }
+        .actions .cancel { background: #374151; color: var(--text); }
+        .actions .save { background: var(--primary); color: white; }
+
+        .hint {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .provider-info {
+            background: rgba(124, 58, 237, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .provider-info a { color: var(--primary); }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Loading Screen -->
-        <div id="loading-screen">
-            <div class="loader"></div>
-            <p>Loading SillyTavern...</p>
-            <p class="subtitle">Preparing local AI assistant</p>
-        </div>
-
-        <!-- Welcome Screen -->
-        <div id="welcome-screen" class="hidden">
-            <h1>SillyTavern</h1>
-            <p class="tagline">Local AI Chat Application</p>
-
-            <div class="setup-card">
-                <h3>Select AI Mode</h3>
-                
-                <button class="option-btn selected" data-mode="webllm">
-                    <i class="fa-solid fa-microchip"></i>
-                    <div>
-                        <strong>Local AI (WebLLM)</strong>
-                        <p class="desc">Runs AI locally on your device. No internet needed. Requires WebGPU support.</p>
-                    </div>
-                </button>
-
-                <button class="option-btn" data-mode="api">
-                    <i class="fa-solid fa-cloud"></i>
-                    <div>
-                        <strong>Free API</strong>
-                        <p class="desc">Uses free public APIs. Works on all devices. May have usage limits.</p>
-                    </div>
-                </button>
-
-                <button class="option-btn" data-mode="custom">
-                    <i class="fa-solid fa-server"></i>
-                    <div>
-                        <strong>Custom Server</strong>
-                        <p class="desc">Connect to your own SillyTavern or LLM server.</p>
-                    </div>
-                </button>
-            </div>
-
-            <button class="start-btn" id="start-btn">Get Started</button>
-        </div>
-
-        <!-- Main Interface (Hidden until setup) -->
-        <header id="header" class="hidden">
-            <div class="logo">
-                <img src="./img/logo.svg" alt="Logo">
-                <span>SillyTavern</span>
-            </div>
-            <div class="actions">
-                <button id="btn-characters" title="Characters"><i class="fa-solid fa-users"></i></button>
-                <button id="btn-settings" title="Settings"><i class="fa-solid fa-gear"></i></button>
-            </div>
+        <header>
+            <h1>AI Chat</h1>
+            <button id="btn-settings">⚙️</button>
         </header>
 
-        <main id="chat-container" class="hidden">
-            <div id="welcome-message" class="flex flex-col items-center justify-center h-full text-center">
-                <img src="./img/logo.svg" alt="SillyTavern" style="width: 80px; height: 80px; opacity: 0.3; margin-bottom: 20px;">
-                <h2 style="font-size: 20px; margin-bottom: 8px;">Welcome to SillyTavern</h2>
-                <p style="color: #6B7280; font-size: 14px;">Select a character to start chatting</p>
+        <main id="chat">
+            <div id="welcome">
+                <div class="icon">🤖</div>
+                <h2>Welcome to AI Chat</h2>
+                <p>Configure your AI provider in settings to get started</p>
             </div>
-            <div id="messages-container"></div>
+            <div id="messages"></div>
         </main>
 
         <div id="input-area" class="hidden">
-            <div class="input-row">
-                <textarea id="message-input" placeholder="Type your message..." rows="1" disabled></textarea>
-                <button id="send-btn" disabled><i class="fa-solid fa-paper-plane"></i></button>
+            <div class="row">
+                <textarea id="msg-input" placeholder="Type your message..." rows="1"></textarea>
+                <button id="send-btn" disabled>➤</button>
             </div>
         </div>
 
-        <!-- Status Bar -->
-        <div id="status-bar">
+        <div id="status">
             <span class="dot red"></span>
-            <span id="status-text">Initializing...</span>
+            <span id="status-text">Not configured</span>
         </div>
 
-        <!-- Character Selector -->
-        <div id="character-selector">
-            <div class="header">
-                <h3>Characters</h3>
-                <button class="close-btn" id="close-characters"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="character-list">
-                <div class="character-card" data-char="seraphina">
-                    <div class="avatar">👩</div>
-                    <div class="info">
-                        <h4>Seraphina</h4>
-                        <p>Your friendly AI assistant</p>
-                    </div>
-                </div>
-                <div class="character-card" data-char="helper">
-                    <div class="avatar">🤖</div>
-                    <div class="info">
-                        <h4>Helper Bot</h4>
-                        <p>General purpose assistant</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Overlay -->
-        <div id="overlay"></div>
-
-        <!-- Settings Modal -->
         <div class="modal" id="settings-modal">
             <div class="modal-content">
-                <h3><i class="fa-solid fa-gear"></i> Settings</h3>
-                
+                <h3>⚙️ AI Settings</h3>
+
+                <div class="provider-info">
+                    Get your API key from the provider's website, then configure below.
+                </div>
+
                 <div class="form-group">
-                    <label>AI Mode</label>
-                    <select id="ai-mode">
-                        <option value="webllm">Local AI (WebLLM)</option>
-                        <option value="api">Free API</option>
-                        <option value="custom">Custom Server</option>
+                    <label>AI Provider</label>
+                    <select id="provider">
+                        <option value="openai">OpenAI (GPT-4, GPT-3.5)</option>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="gemini">Google (Gemini)</option>
+                        <option value="groq">Groq (Free - Llama, Mixtral)</option>
+                        <option value="openrouter">OpenRouter (Many models)</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="ollama">Ollama (Local)</option>
                     </select>
                 </div>
 
-                <div id="custom-api-config" style="display: none;">
-                    <div class="form-group">
-                        <label>API Endpoint</label>
-                        <input type="text" id="api-endpoint" placeholder="https://api.example.com/v1/chat">
-                    </div>
-                    <div class="form-group">
-                        <label>API Key (optional)</label>
-                        <input type="password" id="api-key" placeholder="sk-...">
-                    </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="password" id="api-key" placeholder="sk-...">
+                    <p class="hint">Your API key is stored locally and never sent to our servers</p>
                 </div>
 
-                <div id="free-api-info">
-                    <div class="form-group">
-                        <label>Free API Provider</label>
-                        <select id="free-provider">
-                            <option value="openrouter">OpenRouter (Free Models)</option>
-                            <option value="groq">Groq (Free Tier)</option>
-                            <option value="together">Together AI (Free Credits)</option>
-                        </select>
-                    </div>
+                <div class="form-group" id="model-group">
+                    <label>Model</label>
+                    <select id="model">
+                        <option value="gpt-4o">GPT-4o</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="base-url-group" style="display: none;">
+                    <label>Base URL</label>
+                    <input type="text" id="base-url" placeholder="http://localhost:11434/v1">
+                    <p class="hint">For Ollama or custom endpoints</p>
                 </div>
 
                 <div class="form-group">
@@ -629,462 +351,384 @@
                     <input type="text" id="system-prompt" value="You are a helpful AI assistant.">
                 </div>
 
-                <div class="modal-actions">
-                    <button class="cancel" id="cancel-settings">Cancel</button>
-                    <button class="save" id="save-settings">Save</button>
+                <div class="actions">
+                    <button class="cancel" id="cancel-btn">Cancel</button>
+                    <button class="save" id="save-btn">Save</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        // App State
+    <script>
         const state = {
-            mode: 'webllm',
-            apiEndpoint: '',
+            provider: 'openai',
             apiKey: '',
-            freeProvider: 'openrouter',
+            model: 'gpt-4o',
+            baseUrl: '',
             systemPrompt: 'You are a helpful AI assistant.',
-            currentCharacter: null,
             messages: [],
-            isGenerating: false,
-            webllmModel: null,
+            generating: false,
         };
 
-        // DOM Elements
-        const $ = (sel) => document.querySelector(sel);
-        const $$ = (sel) => document.querySelectorAll(sel);
+        const $ = s => document.querySelector(s);
 
-        // Initialize
-        async function init() {
+        // Model lists
+        const models = {
+            openai: [
+                { value: 'gpt-4o', label: 'GPT-4o' },
+                { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+                { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+                { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+            ],
+            anthropic: [
+                { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+                { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku' },
+                { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
+            ],
+            gemini: [
+                { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+                { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+            ],
+            groq: [
+                { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+                { value: 'llama-3.1-70b-versatile', label: 'Llama 3.1 70B' },
+                { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
+            ],
+            openrouter: [
+                { value: 'google/gemma-2-9b-it', label: 'Gemma 2 9B (Free)' },
+                { value: 'anthropic/claude-3-haiku', label: 'Claude 3 Haiku (Free)' },
+                { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini' },
+            ],
+            deepseek: [
+                { value: 'deepseek-chat', label: 'DeepSeek Chat' },
+                { value: 'deepseek-coder', label: 'DeepSeek Coder' },
+            ],
+            ollama: [
+                { value: 'llama3.2', label: 'Llama 3.2' },
+                { value: 'llama3.1', label: 'Llama 3.1' },
+                { value: 'qwen2.5', label: 'Qwen 2.5' },
+                { value: 'mistral', label: 'Mistral' },
+            ],
+        };
+
+        // API endpoints
+        const endpoints = {
+            openai: 'https://api.openai.com/v1/chat/completions',
+            anthropic: 'https://api.anthropic.com/v1/messages',
+            gemini: 'https://generativelanguage.googleapis.com/v1beta/models',
+            groq: 'https://api.groq.com/openai/v1/chat/completions',
+            openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+            deepseek: 'https://api.deepseek.com/chat/completions',
+            ollama: '',
+        };
+
+        function init() {
             loadSettings();
-            setupEventListeners();
-            
-            // Check WebGPU support
-            if (state.mode === 'webllm') {
-                await initWebLLM();
-            }
-            
-            // Hide loading, show welcome
-            $('#loading-screen').style.display = 'none';
-            
-            const hasSetup = localStorage.getItem('st_setup_complete');
-            if (hasSetup) {
-                showMainInterface();
-            } else {
-                $('#welcome-screen').classList.remove('hidden');
-            }
+            setupEvents();
+            updateUI();
         }
 
-        // Load saved settings
         function loadSettings() {
-            const saved = localStorage.getItem('st_settings');
+            const saved = localStorage.getItem('ai_chat_settings');
             if (saved) {
-                const settings = JSON.parse(saved);
-                Object.assign(state, settings);
+                Object.assign(state, JSON.parse(saved));
             }
         }
 
-        // Save settings
         function saveSettings() {
-            localStorage.setItem('st_settings', JSON.stringify(state));
+            localStorage.setItem('ai_chat_settings', JSON.stringify(state));
         }
 
-        // Setup event listeners
-        function setupEventListeners() {
-            // Welcome screen
-            $$('#welcome-screen .option-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    $$('#welcome-screen .option-btn').forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    state.mode = btn.dataset.mode;
-                });
+        function setupEvents() {
+            $('#provider').addEventListener('change', e => {
+                state.provider = e.target.value;
+                updateModels();
+                $('#base-url-group').style.display = state.provider === 'ollama' ? 'block' : 'none';
             });
 
-            $('#start-btn').addEventListener('click', () => {
-                localStorage.setItem('st_setup_complete', 'true');
-                saveSettings();
-                showMainInterface();
-            });
-
-            // Header buttons
-            $('#btn-characters').addEventListener('click', () => openCharacterSelector());
-            $('#btn-settings').addEventListener('click', () => openSettings());
-
-            // Close character selector
-            $('#close-characters').addEventListener('click', closeCharacterSelector);
-            $('#overlay').addEventListener('click', closeCharacterSelector);
-
-            // Character selection
-            $$('.character-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    selectCharacter(card.dataset.char);
-                });
-            });
-
-            // Message input
-            const input = $('#message-input');
-            input.addEventListener('input', autoResize);
-            input.addEventListener('keydown', (e) => {
+            $('#send-btn').addEventListener('click', send);
+            $('#msg-input').addEventListener('keydown', e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    sendMessage();
+                    send();
                 }
             });
 
-            // Send button
-            $('#send-btn').addEventListener('click', sendMessage);
-
-            // Settings modal
-            $('#ai-mode').addEventListener('change', (e) => {
-                const mode = e.target.value;
-                $('#custom-api-config').style.display = mode === 'custom' ? 'block' : 'none';
-                $('#free-api-info').style.display = mode === 'api' ? 'block' : 'none';
+            $('#msg-input').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
             });
 
-            $('#cancel-settings').addEventListener('click', closeSettings);
-            $('#save-settings').addEventListener('click', saveSettingsAndClose);
+            $('#btn-settings').addEventListener('click', openSettings);
+            $('#cancel-btn').addEventListener('click', closeSettings);
+            $('#save-btn').addEventListener('click', saveSettingsAndClose);
         }
 
-        // Show main interface
-        function showMainInterface() {
-            $('#welcome-screen').classList.add('hidden');
-            $('#header').classList.remove('hidden');
-            $('#chat-container').classList.remove('hidden');
-            $('#input-area').classList.remove('hidden');
-            
-            updateStatus('ready', 'Ready');
-            enableInput(true);
+        function updateModels() {
+            const select = $('#model');
+            select.innerHTML = '';
+            const list = models[state.provider] || models.openai;
+            list.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.value;
+                opt.textContent = m.label;
+                select.appendChild(opt);
+            });
+            if (list.length > 0) {
+                select.value = list[0].value;
+            }
         }
 
-        // Open character selector
-        function openCharacterSelector() {
-            $('#character-selector').classList.add('open');
-            $('#overlay').classList.add('show');
-        }
-
-        // Close character selector
-        function closeCharacterSelector() {
-            $('#character-selector').classList.remove('open');
-            $('#overlay').classList.remove('show');
-        }
-
-        // Select character
-        function selectCharacter(charId) {
-            state.currentCharacter = charId;
-            $$('.character-card').forEach(c => c.classList.remove('active'));
-            $(`[data-char="${charId}"]`).classList.add('active');
-            
-            state.messages = [];
-            $('#messages-container').innerHTML = '';
-            $('#welcome-message').style.display = 'none';
-            
-            closeCharacterSelector();
-            enableInput(true);
-            updateStatus('ready', 'Character selected');
-        }
-
-        // Open settings
-        function openSettings() {
-            $('#ai-mode').value = state.mode;
-            $('#api-endpoint').value = state.apiEndpoint;
+        function updateUI() {
+            $('#provider').value = state.provider;
             $('#api-key').value = state.apiKey;
-            $('#free-provider').value = state.freeProvider;
+            $('#base-url').value = state.baseUrl;
             $('#system-prompt').value = state.systemPrompt;
-            
-            $('#custom-api-config').style.display = state.mode === 'custom' ? 'block' : 'none';
-            $('#free-api-info').style.display = state.mode === 'api' ? 'block' : 'none';
-            
+            updateModels();
+            $('#base-url-group').style.display = state.provider === 'ollama' ? 'block' : 'none';
+
+            if (state.apiKey || state.provider === 'ollama') {
+                $('#input-area').classList.remove('hidden');
+                $('#send-btn').disabled = false;
+                showStatus('green', 'Ready');
+            } else {
+                $('#input-area').classList.add('hidden');
+                $('#send-btn').disabled = true;
+                showStatus('red', 'Configure API key');
+            }
+        }
+
+        function openSettings() {
+            updateModels();
             $('#settings-modal').classList.add('show');
         }
 
-        // Close settings
         function closeSettings() {
             $('#settings-modal').classList.remove('show');
         }
 
-        // Save settings and close
         function saveSettingsAndClose() {
-            state.mode = $('#ai-mode').value;
-            state.apiEndpoint = $('#api-endpoint').value;
+            state.provider = $('#provider').value;
             state.apiKey = $('#api-key').value;
-            state.freeProvider = $('#free-provider').value;
+            state.model = $('#model').value;
+            state.baseUrl = $('#base-url').value;
             state.systemPrompt = $('#system-prompt').value;
-            
             saveSettings();
             closeSettings();
-            
-            updateStatus('loading', 'Reinitializing...');
+            updateUI();
+            showStatus('green', 'Settings saved');
         }
 
-        // Update status bar
-        function updateStatus(type, text) {
-            const bar = $('#status-bar');
-            const dot = bar.querySelector('.dot');
-            bar.classList.add('show');
-            
-            dot.className = 'dot ' + type;
+        function showStatus(color, text) {
+            const status = $('#status');
+            status.querySelector('.dot').className = 'dot ' + color;
             $('#status-text').textContent = text;
-            
-            setTimeout(() => bar.classList.remove('show'), 3000);
+            status.classList.add('show');
+            setTimeout(() => status.classList.remove('show'), 3000);
         }
 
-        // Enable/disable input
-        function enableInput(enabled) {
-            const input = $('#message-input');
-            const btn = $('#send-btn');
-            input.disabled = !enabled || !state.currentCharacter;
-            btn.disabled = !enabled || !state.currentCharacter;
-        }
-
-        // Auto resize textarea
-        function autoResize() {
-            const input = $('#message-input');
-            input.style.height = 'auto';
-            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-        }
-
-        // Send message
-        async function sendMessage() {
-            const input = $('#message-input');
+        async function send() {
+            const input = $('#msg-input');
             const content = input.value.trim();
-            
-            if (!content || state.isGenerating) return;
-            
-            // Add user message
-            addMessage('user', content);
-            input.value = '';
-            autoResize();
-            
-            state.isGenerating = true;
-            enableInput(false);
-            
-            // Show typing indicator
-            showTyping();
-            
-            try {
-                let response;
-                
-                if (state.mode === 'webllm') {
-                    response = await generateWithWebLLM(content);
-                } else if (state.mode === 'api') {
-                    response = await generateWithFreeAPI(content);
-                } else {
-                    response = await generateWithCustomAPI(content);
-                }
-                
-                hideTyping();
-                addMessage('assistant', response);
-            } catch (error) {
-                hideTyping();
-                addMessage('assistant', 'Sorry, I encountered an error: ' + error.message);
-                updateStatus('error', 'Error: ' + error.message);
+            if (!content || state.generating) return;
+
+            if (!state.apiKey && state.provider !== 'ollama') {
+                showStatus('red', 'Please configure API key');
+                return;
             }
-            
-            state.isGenerating = false;
-            enableInput(true);
+
+            addMsg('user', content);
+            input.value = '';
+            input.style.height = 'auto';
+
+            state.generating = true;
+            $('#send-btn').disabled = true;
+            showTyping();
+
+            try {
+                const response = await generate(content);
+                addMsg('assistant', response);
+            } catch (error) {
+                addMsg('assistant', 'Error: ' + error.message);
+                showStatus('red', 'Error');
+            }
+
+            state.generating = false;
+            $('#send-btn').disabled = false;
+            removeTyping();
         }
 
-        // Add message to chat
-        function addMessage(role, content) {
-            const container = $('#messages-container');
-            $('#welcome-message').style.display = 'none';
-            
+        async function generate(userMessage) {
+            const provider = state.provider;
+            const model = state.model;
+
+            if (provider === 'anthropic') {
+                return await callAnthropic(userMessage);
+            } else if (provider === 'gemini') {
+                return await callGemini(userMessage);
+            } else {
+                return await callOpenAICompatible(userMessage);
+            }
+        }
+
+        async function callOpenAICompatible(userMessage) {
+            const msgs = [
+                { role: 'system', content: state.systemPrompt },
+                ...state.messages.map(m => ({ role: m.role, content: m.content })),
+                { role: 'user', content: userMessage },
+            ];
+
+            let url = endpoints[state.provider];
+            if (state.provider === 'ollama' && state.baseUrl) {
+                url = state.baseUrl + '/chat/completions';
+            }
+
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+
+            if (state.provider === 'openrouter') {
+                headers['Authorization'] = `Bearer ${state.apiKey}`;
+                headers['HTTP-Referer'] = 'https://ai-chat.app';
+                headers['X-Title'] = 'AI Chat';
+            } else if (state.provider === 'groq') {
+                headers['Authorization'] = `Bearer ${state.apiKey}`;
+            } else if (state.provider === 'deepseek') {
+                headers['Authorization'] = `Bearer ${state.apiKey}`;
+            } else {
+                headers['Authorization'] = `Bearer ${state.apiKey}`;
+            }
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    model: state.model,
+                    messages: msgs,
+                    max_tokens: 2000,
+                    temperature: 0.7,
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error?.message || `HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            return data.choices[0].message.content;
+        }
+
+        async function callAnthropic(userMessage) {
+            const msgs = state.messages.map(m => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.content,
+            }));
+            msgs.push({ role: 'user', content: userMessage });
+
+            const res = await fetch(endpoints.anthropic, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': state.apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true',
+                },
+                body: JSON.stringify({
+                    model: state.model,
+                    max_tokens: 2000,
+                    system: state.systemPrompt,
+                    messages: msgs,
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error?.message || `HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            return data.content[0].text;
+        }
+
+        async function callGemini(userMessage) {
+            const msgs = state.messages.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }],
+            }));
+            msgs.push({
+                role: 'user',
+                parts: [{ text: userMessage }],
+            });
+
+            const url = `${endpoints.gemini}/${state.model}:generateContent?key=${state.apiKey}`;
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: msgs,
+                    systemInstruction: { parts: [{ text: state.systemPrompt }] },
+                    generationConfig: { maxOutputTokens: 2000, temperature: 0.7 },
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error?.message || `HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        function addMsg(role, content) {
+            $('#welcome').classList.add('hidden');
+            state.messages.push({ role, content });
+
+            const container = $('#messages');
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${role === 'user' ? 'user' : ''}`;
-            msgDiv.innerHTML = `
+
+            const div = document.createElement('div');
+            div.className = `msg ${role === 'user' ? 'user' : ''}`;
+            div.innerHTML = `
                 <div class="avatar">${role === 'user' ? '👤' : '🤖'}</div>
                 <div class="bubble">
                     <p>${escapeHtml(content)}</p>
                     <span class="time">${time}</span>
                 </div>
             `;
-            
-            container.appendChild(msgDiv);
+            container.appendChild(div);
             container.scrollTop = container.scrollHeight;
-            
-            state.messages.push({ role, content });
         }
 
-        // Show typing indicator
         function showTyping() {
-            const container = $('#messages-container');
-            const typing = document.createElement('div');
-            typing.id = 'typing';
-            typing.className = 'message typing';
-            typing.innerHTML = `
+            const container = $('#messages');
+            const div = document.createElement('div');
+            div.id = 'typing';
+            div.className = 'msg';
+            div.innerHTML = `
                 <div class="avatar">🤖</div>
-                <div class="bubble typing-indicator">
+                <div class="bubble typing">
                     <span></span><span></span><span></span>
                 </div>
             `;
-            container.appendChild(typing);
+            container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        // Hide typing indicator
-        function hideTyping() {
+        function removeTyping() {
             const typing = $('#typing');
             if (typing) typing.remove();
         }
 
-        // Escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
-            return div.innerHTML.replace(/\n/g, '<br>');
+            return div.innerHTML;
         }
 
-        // Generate with WebLLM (placeholder - needs @mlc-ai/webllm)
-        async function generateWithWebLLM(content) {
-            updateStatus('loading', 'Generating with local AI...');
-            
-            // This is a placeholder. Full WebLLM integration requires:
-            // 1. Loading the @mlc-ai/webllm package
-            // 2. Downloading a model (like Llama-3.2B)
-            // 3. Running inference on WebGPU
-            
-            // For demo, return a simulated response
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            return "WebLLM integration ready. This is a demo response. Full model loading would happen here with actual WebLLM implementation.";
-        }
-
-        // Generate with free API
-        async function generateWithFreeAPI(content) {
-            updateStatus('loading', 'Calling free API...');
-            
-            const apiConfigs = {
-                openrouter: {
-                    url: 'https://openrouter.ai/api/v1/chat/completions',
-                    headers: {
-                        'Authorization': 'Bearer sk-or-v1-demo',
-                        'Content-Type': 'application/json',
-                    },
-                    model: 'google/gemma-2-2b-it:free'
-                },
-                groq: {
-                    url: 'https://api.groq.com/openai/v1/chat/completions',
-                    headers: {
-                        'Authorization': 'Bearer gsk_demo',
-                        'Content-Type': 'application/json',
-                    },
-                    model: 'llama-3.2-3b-preview'
-                },
-                together: {
-                    url: 'https://api.together.xyz/v1/chat/completions',
-                    headers: {
-                        'Authorization': 'Bearer ffdemo',
-                        'Content-Type': 'application/json',
-                    },
-                    model: 'mistralai/Mistral-7B-Instruct-v0.2'
-                }
-            };
-
-            const config = apiConfigs[state.freeProvider];
-            
-            const messages = [
-                { role: 'system', content: state.systemPrompt },
-                ...state.messages.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content })),
-                { role: 'user', content }
-            ];
-
-            try {
-                const response = await fetch(config.url, {
-                    method: 'POST',
-                    headers: config.headers,
-                    body: JSON.stringify({
-                        model: config.model,
-                        messages,
-                        max_tokens: 500,
-                        temperature: 0.7,
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.choices[0].message.content;
-            } catch (error) {
-                // Fallback to demo response if API fails
-                console.warn('Free API unavailable, using demo response:', error);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return getDemoResponse(content);
-            }
-        }
-
-        // Generate with custom API
-        async function generateWithCustomAPI(content) {
-            if (!state.apiEndpoint) {
-                throw new Error('Please configure API endpoint in settings');
-            }
-
-            updateStatus('loading', 'Calling custom API...');
-
-            const messages = [
-                { role: 'system', content: state.systemPrompt },
-                ...state.messages.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content })),
-                { role: 'user', content }
-            ];
-
-            const headers = {
-                'Content-Type': 'application/json',
-            };
-
-            if (state.apiKey) {
-                headers['Authorization'] = `Bearer ${state.apiKey}`;
-            }
-
-            const response = await fetch(state.apiEndpoint, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages,
-                    max_tokens: 500,
-                    temperature: 0.7,
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.choices[0].message.content;
-        }
-
-        // Demo response generator
-        function getDemoResponse(input) {
-            const responses = [
-                "That's an interesting question! Let me think about it...\n\nBased on my analysis, I believe the best approach would be to consider all the factors involved.",
-                "I understand what you're asking. Here's my perspective:\n\nThe topic you're discussing has multiple perspectives to consider.",
-                "Great question! As an AI assistant, I can help with many tasks including:\n\n• Answering questions\n• Writing and editing\n• Problem solving\n• Learning new topics",
-                "I'd be happy to help with that! Here's a thoughtful response:\n\nThe key points to consider are context, accuracy, and relevance to your needs.",
-            ];
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        // Initialize WebLLM (placeholder)
-        async function initWebLLM() {
-            updateStatus('loading', 'Checking WebGPU...');
-            
-            // Check for WebGPU support
-            if (!navigator.gpu) {
-                console.warn('WebGPU not supported');
-                updateStatus('warning', 'WebGPU not available');
-                return false;
-            }
-            
-            updateStatus('ready', 'WebGPU ready');
-            return true;
-        }
-
-        // Start app
         init();
     </script>
 </body>

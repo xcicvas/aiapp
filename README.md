@@ -1,34 +1,27 @@
-# SillyTavern - Local AI Chat
+# AI Chat - Multi-Provider AI Client
 
-基于 SillyTavern 构建的**完全离线** Android 应用，无需任何云端配置即可使用。
+通用的 AI 聊天应用，支持连接各大 AI 厂商 API。
 
-## 功能特点
+## 支持的 AI 提供商
 
-- 🤖 **本地 AI** - 使用 WebLLM 在浏览器中直接运行 AI 模型
-- 🌐 **免费 API** - 支持 OpenRouter、Groq、Together AI 等免费 API
-- 🔧 **自定义服务器** - 可连接任何 OpenAI 兼容的 API
-- 📱 **移动优化** - 原生 Android 应用，离线可用
-- 💬 **聊天功能** - 与 AI 角色对话
-- 🎭 **角色管理** - 创建和管理 AI 角色
-- 🔒 **隐私保护** - 数据存储在本地设备
+| 提供商 | 模型 | 说明 |
+|--------|------|------|
+| **OpenAI** | GPT-4o, GPT-4o Mini, GPT-4 Turbo, GPT-3.5 | 官方 API |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Opus | Claude 系列 |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro, Gemini 1.5 Flash | Gemini 系列 |
+| **Groq** | Llama 3.3 70B, Llama 3.1 70B, Mixtral 8x7B | 免费额度 |
+| **OpenRouter** | Gemma 2 9B (免费), Claude 3 Haiku (免费) | 多模型聚合 |
+| **DeepSeek** | DeepSeek Chat, DeepSeek Coder | 国产高性能 |
+| **Ollama** | Llama 3.2, Qwen 2.5, Mistral | 本地部署 |
 
-## AI 模式
+## 功能
 
-### 1. 本地 AI (WebLLM)
-- 完全离线运行
-- 使用设备 GPU
-- 无需互联网连接
-- 需要设备支持 WebGPU
-
-### 2. 免费 API
-- OpenRouter (免费模型)
-- Groq (免费额度)
-- Together AI (免费积分)
-
-### 3. 自定义服务器
-- 连接 SillyTavern 服务器
-- 连接 Ollama
-- 连接任何 OpenAI 兼容 API
+- 🤖 多 AI 提供商支持
+- 💬 流畅的聊天界面
+- ⚙️ 自定义系统提示词
+- 📱 移动端优化
+- 🔒 API Key 本地存储
+- 🌙 深色主题
 
 ## 构建
 
@@ -53,15 +46,32 @@ cd android
 
 APK 位置: `android/app/build/outputs/apk/debug/app-debug.apk`
 
+## 使用方法
+
+1. 安装 APK 到手机
+2. 点击右上角 ⚙️ 设置
+3. 选择 AI 提供商
+4. 输入 API Key
+5. 保存并开始聊天
+
+## 获取 API Key
+
+- OpenAI: https://platform.openai.com/api-keys
+- Anthropic: https://console.anthropic.com/settings/keys
+- Google: https://aistudio.google.com/app/apikey
+- Groq: https://console.groq.com/keys
+- OpenRouter: https://openrouter.ai/keys
+- DeepSeek: https://platform.deepseek.com/api_keys
+- Ollama: https://ollama.com
+
 ## 技术栈
 
 | 技术 | 说明 |
 |------|------|
 | Capacitor 6.x | 混合应用框架 |
 | Vite 5.x | 前端构建 |
-| WebLLM | 本地 AI 推理 |
 | Android | 原生应用 |
 
 ## 许可证
 
-基于 AGPL-3.0 许可证
+MIT License
